@@ -41,6 +41,8 @@ public class AuthHandlerInterceptor implements HandlerInterceptor {
         // 为空就返回错误
         String token = request.getHeader("token");
         if (null == token || "".equals(token.trim())) {
+            log.info("url:{}.", request.getRequestURL());
+            log.info("method:{}.", request.getMethod());
             throw new NotLoginException("请登录");
         }
         log.info("==============token:" + token);

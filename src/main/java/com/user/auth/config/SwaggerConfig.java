@@ -9,7 +9,8 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import springfox.documentation.swagger2.annotations.EnableSwagger2WebFlux;
+import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 /**
  * 注解	使用的地方	用途
@@ -21,22 +22,26 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * @ApiModel 参数实体类    可设置接口相关实体的描述
  * ApiModelProperty	参数实体类属性	可设置实体属性的相关描述
  */
-@EnableSwagger2
+@EnableSwagger2WebFlux
 @Configuration
 public class SwaggerConfig {
     @Bean
     public Docket getUserDocket(){
-        ApiInfo apiInfo=new ApiInfoBuilder()
-                .title("用户管理")//api标题
-                .description("用户管理相关接口描述")//api描述
-                .version("1.0.0")//版本号
-                .contact(new Contact("jack", "", "jackdream@163.com"))
-                .build();
         return new Docket(DocumentationType.SWAGGER_2)//文档类型（swagger2）
-                .apiInfo(apiInfo)//设置包含在json ResourceListing响应中的api元信息
+                .apiInfo(apiInfo())//设置包含在json ResourceListing响应中的api元信息
                 .select()//启动用于api选择的构建器
                 .apis(RequestHandlerSelectors.basePackage("com.user.auth.user.controller"))//扫描接口的包
                 .paths(PathSelectors.any())//路径过滤器（扫描所有路径）
                 .build();
     }
+
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title("用户管理")//api标题
+                .description("用户管理相关接口描述")//api描述
+                .version("1.0.0")//版本号
+                .contact(new Contact("jack", "", "jackdream@163.com"))
+                .build();
+    }
+
 }
