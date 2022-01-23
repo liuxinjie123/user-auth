@@ -1,16 +1,15 @@
 package com.user.auth.user.controller;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.user.auth.common.dto.CommonConstants;
 import com.user.auth.common.dto.Result;
 import com.user.auth.user.dto.LoginDto;
 import com.user.auth.user.dto.UserDto;
 import com.user.auth.user.entity.User;
 import com.user.auth.user.service.IUserService;
+import com.user.auth.util.RedisUtils;
 import com.user.auth.util.TokenUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +24,7 @@ public class LoginController {
     @Resource
     private IUserService userService;
     @Resource
-    private RedisTemplate redisTemplate;
+    private RedisUtils redisUtils;
 
     @ApiOperation(value = "登录")
     @PostMapping("/login")
@@ -37,7 +36,7 @@ public class LoginController {
         UserDto userDto = BeanUtil.copyProperties(user, UserDto.class);
         String token = tokenUtil.getToken(userDto.getId(), userDto.getMobile());
         userDto.setToken(token);
-        redisTemplate.opsForValue().set(token, userDto);
+        redisUtils.set(token, userDto);
         return Result.success(userDto);
     }
 
@@ -45,7 +44,7 @@ public class LoginController {
     @GetMapping("/self")
     public Result<UserDto> selfInfo(HttpServletRequest request) {
         String token = request.getHeader("token");
-        UserDto userDto = (UserDto) redisTemplate.opsForValue().get(token);
+        UserDto userDto = (UserDto) redisUtils.get(token);
         return Result.success(userDto);
     }
 
