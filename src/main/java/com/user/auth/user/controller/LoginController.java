@@ -10,11 +10,9 @@ import com.user.auth.user.service.IUserService;
 import com.user.auth.util.TokenUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +24,8 @@ public class LoginController {
     private TokenUtil tokenUtil;
     @Resource
     private IUserService userService;
+    @Resource
+    private RedisTemplate redisTemplate;
 
     @ApiOperation(value = "登录")
     @PostMapping("/login")
@@ -35,7 +35,17 @@ public class LoginController {
             return Result.error("登陆失败，用户名或密码错误");
         }
         UserDto userDto = BeanUtil.copyProperties(user, UserDto.class);
-        userDto.setToken(tokenUtil.getToken(userDto.getId(), userDto.getMobile()));
+        String token = tokenUtil.getToken(userDto.getId(), userDto.getMobile());
+        userDto.setToken(token);
+        redisTemplate.opsForValue().set(token, userDto);
+        return Result.success(userDto);
+    }
+
+    @ApiOperation(value = "获取当前的录入user信息")
+    @GetMapping("/self")
+    public Result<UserDto> selfInfo(HttpServletRequest request) {
+        String token = request.getHeader("token");
+        UserDto userDto = (UserDto) redisTemplate.opsForValue().get(token);
         return Result.success(userDto);
     }
 
