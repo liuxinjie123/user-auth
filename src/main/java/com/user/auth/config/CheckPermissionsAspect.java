@@ -52,7 +52,7 @@ public class CheckPermissionsAspect {
         if (null == userDto) {
             throw new NotLoginException("请登录");
         }
-        String userId = userDto.getId();
+//        String userId = userDto.getId();
         List<String> menuCodeList = userDto.getMenuCodeList();
         if (CollectionUtils.isEmpty(menuCodeList)) {
             throw new BusinessException("您没有权限访问此接口");
