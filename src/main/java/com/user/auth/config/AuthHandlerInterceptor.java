@@ -2,10 +2,8 @@ package com.user.auth.config;
 
 import com.user.auth.exception.NotLoginException;
 import com.user.auth.exception.TokenAuthExpiredException;
-import com.user.auth.user.service.IMenuService;
 import com.user.auth.util.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -21,10 +19,8 @@ import java.util.Map;
 public class AuthHandlerInterceptor implements HandlerInterceptor {
     @Resource
     TokenUtil tokenUtil;
-    @Value("${token.privateKey}")
-    private String privateKey;
     @Value("${token.yangToken}")
-    private Long yangToken;
+    private Long youngToken;
     @Value("${token.oldToken}")
     private Long oldToken;
 
@@ -52,9 +48,9 @@ public class AuthHandlerInterceptor implements HandlerInterceptor {
         long timeOfUse = System.currentTimeMillis() - Long.parseLong(map.get("timeStamp"));
         //1.判断 token 是否过期
         //年轻 token
-        if (timeOfUse < yangToken) {
+        if (timeOfUse < youngToken) {
             log.info("年轻 token");
-        } else if (timeOfUse >= yangToken && timeOfUse < oldToken) {
+        } else if (timeOfUse >= youngToken && timeOfUse < oldToken) {
             //老年 token 就刷新 token
             response.setHeader("token", tokenUtil.getToken(userId, userMobile));
         } else {
@@ -75,7 +71,7 @@ public class AuthHandlerInterceptor implements HandlerInterceptor {
             request.setAttribute("userId", userId);
             return true;
         }
-        return false;
+        throw new NotLoginException("请登录");
     }
 
 }

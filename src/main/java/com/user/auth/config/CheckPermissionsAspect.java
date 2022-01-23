@@ -5,6 +5,7 @@ import com.user.auth.annotation.CheckPermissions;
 import com.user.auth.exception.BusinessException;
 import com.user.auth.exception.NotLoginException;
 import com.user.auth.user.service.IMenuService;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -18,6 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 
+@Slf4j
 @Aspect
 @Component
 public class CheckPermissionsAspect {
@@ -29,7 +31,12 @@ public class CheckPermissionsAspect {
 
     @Before("checkPermissions()")
     public void doBefore(JoinPoint joinPoint) throws Throwable {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();//获取request
+        /** 获取 request **/
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        /** 获取 response **/
+//        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+
+        // 判断登录
         String userId = String.valueOf(request.getAttribute("userId"));
         if (StringUtils.isBlank(userId)) {
             throw new NotLoginException("请登录");
@@ -52,5 +59,6 @@ public class CheckPermissionsAspect {
             }
         }
     }
+
 
 }
