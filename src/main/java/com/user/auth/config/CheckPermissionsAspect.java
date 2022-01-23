@@ -14,12 +14,14 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.util.List;
 
 @Slf4j
 @Aspect
@@ -51,6 +53,10 @@ public class CheckPermissionsAspect {
             throw new NotLoginException("请登录");
         }
         String userId = userDto.getId();
+        List<String> menuCodeList = userDto.getMenuCodeList();
+        if (CollectionUtils.isEmpty(menuCodeList)) {
+            throw new BusinessException("您没有权限访问此接口");
+        }
         /** 获取方法上有CheckPermissions注解的参数 **/
         Class clazz = joinPoint.getTarget().getClass();
         String methodName = joinPoint.getSignature().getName();
@@ -61,9 +67,12 @@ public class CheckPermissionsAspect {
             String menuCode = annotation.value();
             if (StringUtils.isNotBlank(menuCode)) {
                 /** 通过用户ID、菜单编码查询是否有关联 **/
-                int count = menuService.checkUserPermission(userId, menuCode);
-                if (count == 0) {
-                    throw new BusinessException("接口无访问权限");
+//                int count = menuService.checkUserPermission(userId, menuCode);
+//                if (count == 0) {
+//                    throw new BusinessException("接口无访问权限");
+//                }
+                if (!menuCodeList.contains(menuCode)) {
+                    throw new BusinessException("您没有权限访问此接口");
                 }
             }
         }

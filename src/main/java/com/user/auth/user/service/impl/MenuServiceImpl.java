@@ -52,4 +52,14 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         }
         return 0;
     }
+
+    @Override
+    public List<Menu> findByMenuIdList(List<String> menuIdList) {
+        return menuMapper.selectList(new QueryWrapper<Menu>().lambda().in(Menu::getId, menuIdList).eq(Menu::getDel, 0));
+    }
+
+    @Override
+    public List<Menu> findByParentId(String parentId) {
+        return menuMapper.selectList(new QueryWrapper<Menu>().lambda().eq(Menu::getParentId, parentId).eq(Menu::getDel, 0));
+    }
 }
