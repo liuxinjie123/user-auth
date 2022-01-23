@@ -1,9 +1,12 @@
 package com.user.auth.user.controller;
 
+import com.user.auth.common.dto.Result;
+import com.user.auth.util.RedisUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -15,6 +18,8 @@ public class RedisTestController {
     private RedisTemplate redisTemplate;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private RedisUtils redisUtils;
 
     @RequestMapping("getString")
 //    @Cacheable(value = "springbootredis",key = "#root.methodName")
@@ -38,5 +43,10 @@ public class RedisTestController {
         String str3=stringRedisTemplate.opsForValue().get("myName");
         String str4=stringRedisTemplate.opsForValue().get("yourName");
         return "验证取值的问题，str1="+str1+"===,str2="+"  "+"===,str3="+str3+"===,str4="+str4;
+    }
+
+    @RequestMapping(value = "createCode")
+    public Result getCode(@RequestParam("type") String type) {
+        return Result.success(redisUtils.createCode(type));
     }
 }

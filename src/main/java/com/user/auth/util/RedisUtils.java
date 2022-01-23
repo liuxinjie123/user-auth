@@ -1,9 +1,14 @@
 package com.user.auth.util;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import cn.hutool.core.date.DateUtil;
+import com.user.auth.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
+@Slf4j
 @Service
 public class RedisUtils {
     @Resource
@@ -206,4 +212,24 @@ public class RedisUtils {
         ZSetOperations<String, Object> zset = redisTemplate.opsForZSet();
         return zset.rangeByScore(key, scoure, scoure1);
     }
+
+    /**
+     * 创建一个唯一的序列号
+     */
+    public String createCode(String prefix) {
+        Long increment = redisTemplate.opsForValue().increment(prefix, 1);
+        if (increment != null) {
+            StringBuffer code = new StringBuffer();
+            code.append(prefix);
+            String localDate = DateUtil.format(LocalDateTime.now(), "yyyyMMdd");
+            code.append(localDate);
+            String format = String.format("%08d", increment);
+            code.append(format);
+            log.info("redis, create code, code={}", code);
+            return code.toString();
+        }else {
+            throw new BusinessException("redis生成code失败");
+        }
+    }
+
 }
