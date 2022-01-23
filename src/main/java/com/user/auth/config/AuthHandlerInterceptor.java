@@ -68,7 +68,6 @@ public class AuthHandlerInterceptor implements HandlerInterceptor {
         }
         // TODO
         if (true) {
-            request.setAttribute("userId", userId);
             return true;
         }
         throw new NotLoginException("请登录");

@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.user.auth.annotation.CheckPermissions;
 import com.user.auth.exception.BusinessException;
 import com.user.auth.exception.NotLoginException;
+import com.user.auth.user.dto.UserDto;
 import com.user.auth.user.service.IMenuService;
+import com.user.auth.util.RedisUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -25,6 +27,8 @@ import java.lang.reflect.Method;
 public class CheckPermissionsAspect {
     @Resource
     private IMenuService menuService;
+    @Resource
+    private RedisUtils redisUtils;
 
     @Pointcut("@annotation(com.user.auth.annotation.CheckPermissions)")
     public void checkPermissions() {}
@@ -37,11 +41,16 @@ public class CheckPermissionsAspect {
 //        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
 
         // 判断登录
-        String userId = String.valueOf(request.getAttribute("userId"));
-        if (StringUtils.isBlank(userId)) {
+        String token = request.getHeader("token");
+        if (StringUtils.isBlank(token)) {
             throw new NotLoginException("请登录");
         }
 
+        UserDto userDto = (UserDto) redisUtils.get(token);
+        if (null == userDto) {
+            throw new NotLoginException("请登录");
+        }
+        String userId = userDto.getId();
         /** 获取方法上有CheckPermissions注解的参数 **/
         Class clazz = joinPoint.getTarget().getClass();
         String methodName = joinPoint.getSignature().getName();
